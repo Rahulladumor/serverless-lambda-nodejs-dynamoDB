@@ -12,8 +12,9 @@ provider:
   runtime: nodejs12.x
   environment: ${self:custom.settings}
   region: us-east-1
+  memorySize: 128
   iamRoleStatements:
-    - Effect: 'Allow'
+    - Effect: "Allow"
       Action:
         - dynamodb:DescribeTable
         - dynamodb:Scan
@@ -22,7 +23,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.POSTS_TABLE}'
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.POSTS_TABLE}"
 
 functions:
   createPost:
@@ -31,6 +32,36 @@ functions:
       - http:
           path: /post
           method: post
+          cors: true
+  getPost:
+    handler: handler.getPost
+    events:
+      - http:
+          path: /post
+          method: get
+          cors: true
+  updatePost:
+    handler: handler.updatePost
+    events:
+      - http:
+          path: /post/{id}
+          method: put
+          cors: true
+deletePost:
+  handler: handler.deletePost
+  events:
+    - http:
+        path: /post/{id}
+        method: delete
+        cors: true
+
+getSinglePost:
+  handler: handler.getSinglePost
+  events:
+    - http:
+        path: /post/{id}
+        method: get
+        cors: true
 
 resources:
   Resources:
@@ -38,11 +69,11 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          - AttributeName: 'id'
-            AttributeType: 'S'
+          - AttributeName: "id"
+            AttributeType: "S"
         KeySchema:
-          - AttributeName: 'id'
-            KeyType: 'HASH'
+          - AttributeName: "id"
+            KeyType: "HASH"
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
